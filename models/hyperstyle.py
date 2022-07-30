@@ -156,7 +156,16 @@ class HyperStyle(nn.Module):
     def __get_w_inversion(self, x, resize=True):
         if self.w_encoder.training:
             self.w_encoder.eval()
+        x = x.to("cpu")
+        self.w_encoder = self.w_encoder.to("cpu")
+        # print("__get_w_inversion self.w_encoder ", self.w_encoder.device, " x ", x.device)
+
         codes = self.w_encoder.forward(x)
+        traced_script_module_encoder = torch.jit.trace(self.w_encoder, x, check_trace=True)
+        traced_script_module_encoder.save("head2-copy_model_encoder_only.jit")
+        print("save head2-copy_model_encoder_only.jit success")
+        codes = codes.to("cuda")
+        self.w_encoder = self.w_encoder.to("cuda")
         if codes.ndim == 2:
             codes = codes + self.latent_avg.repeat(codes.shape[0], 1, 1)[:, 0, :]
         else:

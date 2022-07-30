@@ -33,10 +33,12 @@ class WEncoder(Module):
         self.style_count = 2 * log_size - 2
 
     def forward(self, x):
+        print("WEncoder  forward xx` ", x.shape)
         x = self.input_layer(x)
         x = self.body(x)
         x = self.output_pool(x)
         x = x.view(-1, 512)
         x = self.linear(x)
-        return x.repeat(self.style_count, 1, 1).permute(1, 0, 2)
-
+        x = x.repeat(self.style_count, 1, 1).permute(1, 0, 2)
+        print("WEncoder forward xx result", x.shape)
+        return x
