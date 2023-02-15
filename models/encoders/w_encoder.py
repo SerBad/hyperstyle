@@ -32,13 +32,27 @@ class WEncoder(Module):
         log_size = int(math.log(opts.output_size, 2))
         self.style_count = 2 * log_size - 2
 
+# WEncoder  forward xx`  torch.Size([1, 3, 256, 256])
+# WEncoder forward xx1 result torch.Size([1, 64, 256, 256])
+# WEncoder forward xx2 result torch.Size([1, 512, 16, 16])
+# WEncoder forward xx3 result torch.Size([1, 512, 1, 1])
+# WEncoder forward xx4 result torch.Size([1, 512])
+# WEncoder forward xx5 result torch.Size([1, 512])
+# WEncoder forward xx6 result torch.Size([1, 18, 512])
     def forward(self, x):
+        # [1, 3, 256, 256]
         print("WEncoder  forward xx` ", x.shape)
         x = self.input_layer(x)
+        print("WEncoder forward xx1 result", x.shape)
         x = self.body(x)
+        print("WEncoder forward xx2 result", x.shape)
         x = self.output_pool(x)
+        print("WEncoder forward xx3 result", x.shape)
         x = x.view(-1, 512)
+        print("WEncoder forward xx4 result", x.shape)
         x = self.linear(x)
+        print("WEncoder forward xx5 result", x.shape)
         x = x.repeat(self.style_count, 1, 1).permute(1, 0, 2)
-        print("WEncoder forward xx result", x.shape)
+        # [1, 18, 512]
+        print("WEncoder forward xx6 result", x.shape)
         return x
