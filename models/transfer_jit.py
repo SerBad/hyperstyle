@@ -9,6 +9,7 @@ from torchvision import transforms
 from models.encoders import w_encoder
 
 
+# 加载测试图片
 def load_image(filename):
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -20,6 +21,7 @@ def load_image(filename):
     return img.unsqueeze(dim=0)
 
 
+# 开始压缩模型
 def main():
     def get_keys(d, name):
         if 'state_dict' in d:
@@ -31,6 +33,7 @@ def main():
     opts = Namespace()
     opts.output_size = 1024
     encoder = w_encoder.WEncoder(50, 'ir_se', opts)
+    # 加载原本的模型
     ckpt = torch.load("../checkpoints/faces_w_encoder.pt", map_location='cpu')
 
     encoder.load_state_dict(get_keys(ckpt, 'encoder'), strict=True)
@@ -48,9 +51,11 @@ def main():
 
             traced_script_module_encoder.save(path)
             script_model_vulkan = optimize_for_mobile(traced_script_module_encoder, backend='cpu')
+            # 输出用于客户端的模型
             script_model_vulkan._save_for_lite_interpreter("./faces_w_encoder.ptl")
 
 
 if __name__ == '__main__':
     print(torch.__version__)
+
     main()
